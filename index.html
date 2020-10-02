@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en"><head>  
+<html lang="en"><head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta charset="utf-8">
   <title>Computer Vision Class Project
-  | ECE, Virginia Tech | Fall 2015: ECE 5554/4984</title>
+  | Georgia Tech | Fall 2020: CS 4476</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
   <meta name="author" content="">
 
-<!-- Le styles -->  
+<!-- Le styles -->
   <link href="css/bootstrap.css" rel="stylesheet">
 <style>
 body {
@@ -21,7 +21,7 @@ color: #3366CC;
 color: #FF9900;
 }
 </style>
-  
+
 <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
 
 <!-- HTML5 shim, for IE6-8 support of HTML5 elements --><!--[if lt IE 9]>
@@ -33,7 +33,7 @@ color: #FF9900;
 <div class="container">
 <div class="page-header">
 
-<!-- Title and Name --> 
+<!-- Title and Name -->
 <h1>Zoom Background</h1>
 <span style="font-size: 20px; line-height: 1.5em;"><strong>Anna Dingler, Henna Mian, Allison Nakazawa, Willem Taylor, and Jessie Tepper</strong></span><br>
 <span style="font-size: 18px; line-height: 1.5em;">Fall 2020 CS 4476 Computer Vision: Class Project</span><br>
@@ -47,7 +47,7 @@ Motivation behind the problem you are solving, what applications it has, any bri
 <br><br>
 <!-- Approach -->
 <h3>Approach</h3>
-Describe very clearly and systematically your approach to solve the problem. Tell us exactly what existing implementations you used to build your system. Tell us what obstacles you faced and how you addressed them. Justify any design choices or judgment calls you made in your approach.
+To go about getting rid of unwanted objects in images, we will first use existing segmentation techniques (such as k-means) to divide images into different regions based on the characteristics of pixels. We can then use seam carving methods to remove the unwanted objects that we found during segmentation. We also might adjust our seam carving algorithm to only run on the neighborhood of pixels around the selected object to maximize efficiency. Finally, we can fill in the object gaps using techniques such as image quilting so the images look complete without the objects.
 
 <br><br>
 <!-- Results -->
@@ -98,7 +98,7 @@ Expected: We expect our project to make improvements to basic seam carving algor
 <br><br>Unexpected: Removing objects from images and filling in the background might yield unexpected results. There could be important portions of the image that were removed accidentally. Additionally, there could be unexpected results when we fill in the holes left by objects such as incorrect pattern matching.
 
   <hr>
-  <footer> 
+  <footer>
   <p>© Anna Dingler, Henna Mian, Allison Nakazawa, Willem Taylor, and Jessie Tepper</p>
   </footer>
 </div>
