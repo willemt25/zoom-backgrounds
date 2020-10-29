@@ -90,6 +90,8 @@ if __name__ == '__main__':
 
     selected_object = select_object(labeled_img)
 
+    np.save(img_name, selected_object)
+    
     #this portion is just for displaying the array of 1's and 0's
     # display_img = np.zeros_like(labeled_img)
     # for x in range(len(selected_object)):
