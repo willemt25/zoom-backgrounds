@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     original_img = imageio.imread('data/' + img_name)
 
-    img = cv2.threshold(cv2.imread('data/' + img_name, 0), 90, 255, cv2.THRESH_BINARY)[1]
+    img = cv2.threshold(cv2.imread('data/' + img_name, 0), 40, 255, cv2.THRESH_BINARY)[1]
 
     selection_img = preprocess_image(original_img, img)
     
@@ -97,14 +97,16 @@ if __name__ == '__main__':
     np.save('results/' + img_name, selected_object)
     
     #this portion is just for displaying the array of 1's and 0's
-#     display_img = np.zeros_like(labeled_img)
-#     for x in range(len(selected_object)):
-#         for y in range(len(selected_object[0])):
-#             if selected_object[x][y] == 1:
-#                 display_img[x][y] = [255,0,0]
-#             else:
-#                 display_img[x][y] = [0,0,0]
-#     plt.imshow(display_img, cmap='gray')
-#     plt.axis('off')
-#     plt.title("Returned Binary Image")
-#     plt.show()
+#    display_img = np.zeros_like(labeled_img)
+#    for x in range(len(selected_object)):
+#        for y in range(len(selected_object[0])):
+#            if selected_object[x][y] == 0:
+#                display_img[x][y] = original_img[x][y]
+#            else:
+#                display_img[x][y] = [0,0,0]
+#    plt.imshow(display_img, cmap='gray')
+#    plt.axis('off')
+#    plt.title("Returned Binary Image")
+#    plt.show()
+#
+#    imageio.imwrite('results/' + img_name + '.naive.jpeg', display_img)
