@@ -1,5 +1,5 @@
 import numpy as np
-from imageio import imread
+from imageio import imread, imwrite
 from matplotlib import pyplot as plt
 from PIL import Image as im
 import sys
@@ -22,7 +22,7 @@ class SeamCarve:
 
         b += abs(self.array[i, j - 1, 0] - self.array[i, j + 1, 0])
         g += abs(self.array[i, j - 1, 1] - self.array[i, j + 1, 1])
-        r += abs(self.array[i, j - 1, 2] - self.array[i, j + 1, 2])
+        r += abs(self.array[is
         energy = b + g + r
         return energy
 
@@ -132,20 +132,22 @@ if __name__ == '__main__':
                 B[x][y] = False
     mask = im.fromarray(B)
     
-    plt.imshow(mask)
-    plt.show()
+#    plt.imshow(mask)
+#    plt.show()
     
     image = imread(img_name)
     
-    plt.imshow(image)
-    plt.show()
+#    plt.imshow(image)
+#    plt.show()
     newImg = SeamCarve(image)
     newImg.remove_mask(mask)
     
-    plt.imshow(newImg.image())
-    plt.show()
+#    plt.imshow(newImg.image())
+#    plt.show()
     
     newImg.resize(new_height=len(image), new_width=len(image[0]))
 
     plt.imshow(newImg.image())
     plt.show()
+    
+    imwrite(img_name + 'removed.jpeg', newImage.image())

@@ -85,6 +85,8 @@ if __name__ == '__main__':
     img = cv2.threshold(cv2.imread(img_name, 0), 160, 255, cv2.THRESH_BINARY_INV)[1]
 
     selection_img = preprocess_image(original_img, img)
+    
+    imageio.imwrite(img_name + 'selection.jpeg', selection_img)
 
     labeled_img = connected_comp(img)
 
