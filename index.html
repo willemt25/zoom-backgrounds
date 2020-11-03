@@ -48,14 +48,13 @@ color: #FF9900;
 <!-- Figure -->
 <h3>Teaser Figure</h3>
 <p>The figure below shows an ideal result where the user chooses to remove the television and cups off of the dresser and obtains the image on the right to use as a professional-looking Zoom background.</p>
-<br><br>
+<br>
 <!-- Main Illustrative Figure -->
 <div style="text-align: center;">
 <img style="height: 300px;" alt="" src="data/teaserFigure.jpeg">
 </div>
 
 <br><br>
-
 <!-- Introduction -->
 <h3>Introduction</h3>
 <p>The goal of our project is to remove distracting items from a scene in order to use the scene as a Zoom background in meetings. We will use a connected components segmentation algorithm to identify the distracting objects as blobs and seam carving algorithms to remove the blobs. A user can input an image and our system will allow the user to select objects to be removed. After the user chooses the blobs to remove, our system outputs a final image which can be used as a clean background. The motivation behind our idea comes from the struggle of having to find a blank wall or clean room whenever we need to join a Zoom meeting. With remote interviews and important meetings, our backgrounds become important in how we present ourselves. The system we are presenting would solve that problem by providing a quickly and easily accessible background that's not distracting (ex: textbooks or clothes behind you or preset ocean background). The domain we are working in would be regular RGB photographs.</p>
@@ -67,18 +66,22 @@ color: #FF9900;
 <p>To go about getting rid of unwanted objects in images, we first use connected component labeling to detect different blobs in the image. One of the other early segmentation techniques attempted was mean shift, but this was found to be ineffective because it resulted in objects in different locations of the image with roughly the same color being considered a single object. This made it especially hard to correctly segment multi colored objects and different objects with similar colors. Using deformable contours was also attempted, but this method made it much harder to correctly identify objects of some shapes.</p>
 <p>Therefore, connected components ended up being the chosen segmentation technique because it is able to recognize objects that are multicolored as well as any shape. This algorithm uses binary thresholding on grayscale images to separate the image into foreground and background based on color, and labels the different blobs in the foreground. We drew inspiration from https://iq.opengenus.org/connected-component-labeling/ as the basis for detecting the connected components in the image. For each image, we modified the thresholding parameters utilized in the code above. Images with light backgrounds used inverse binary thresholding, images with dark backgrounds used binary thresholding, and the threshold level was adjusted for each image depending on the level of contrast.
 From there, the user is presented with an image containing only the detected blobs with the background removed as shown below.</p>
-<br><br>
+<br>
 <!-- Show Blobs Figure -->
 <div style="text-align: center;">
 <img style="height: 300px;" alt="" src="results/light.jpeg.selection.jpeg">
 </div>
+<br>
 <p>We chose to keep the original pixel values when displaying the blobs to the user rather than display each individual blob with a uniform color in an effort to make the objects recognizable to the user. Originally, the potential objects that a user could remove were going to be highlighted in some uniform color. However, it was found that some of the images appeared very cluttered with many different objects highlighted, and it was hard for a user to recognize objects in the picture. Therefore, the original pixel values from the image are displayed to the user, and the user can then select the blobs they would like to remove by clicking on a point within each object.
 The system then determines which blobs those points belong to and marks all pixels in those blobs for removal as shown below.</p>
+<br>
 <!-- Selected Blobs Figure -->
 <div style="text-align: center;">
 <img style="height: 300px;" alt="" src="results/light.jpeg.display_selected.jpeg">
 </div>
+<br>
 <p>We then use seam carving methods to remove the unwanted objects that we found during segmentation. To do this, we started working with the result from the segmentation. The numpy array from segmentation is loaded into the seam carving file. This array is changed to be an array of boolean values based on whether each pixel is a 1 or 0. This array is then transformed into an image to be the mask that will be removed using seam carving. For each image, we compute the energy image and the cumulative minimum energy map. Then, in order to replace the seams from the removed object, we took an approach similar to removing seams. We found the minimal seam and inserted it over the gap as shown below. This completely filled in the gap created by the object removal from the previous step.</p>
+<br>
 <!-- Filled-In Object Figure -->
 <div style="text-align: center;">
 <img style="height: 300px;" alt="" src="results/light.jpeg.removed.jpeg">
@@ -101,7 +104,7 @@ The system then determines which blobs those points belong to and marks all pixe
 <br>
 <ol>
     <li>Take pictures of scenes with various objects to potentially remove.</li>
-    <li>Change the threshold parameters. For images with a light background, we used inverse binary thresholding. For images with a dark background, we used binary thresholding. In addition, the threshold value is adjusted for each image based on the contrast level between the background and the foreground. We tried to have the threshold value fall in between the darkest part of the background</li>
+    <li>Change the threshold parameters. For images with a light background, we used inverse binary thresholding. For images with a dark background, we used binary thresholding. In addition, the threshold value is adjusted for each image based on the contrast level between the background and the foreground.  We tried to have the threshold value fall in between the darkest part of the background and the lightest part of the foreground.</li>
     <li>Run our segmentation program and select objects from the original scene to remove.</li>
     <li>Run our blob removal and replacement program to remove the selected objects from the scene.</li>
     <li>Qualitatively evaluate the resulting image by showing it to humans and asking them to identify any inconsistencies with the chosen objects and disruptions they can perceive within the image.</li>
@@ -117,6 +120,7 @@ The system then determines which blobs those points belong to and marks all pixe
 <br>
 <h4>Naive Approach</h4>
 <p>The naive approach to our problem is to detect the blobs in the image, determine which blobs the user would like to remove, and then replace the blob’s pixel with a color from the background. Below you can see an example of the original image and the naive approach applied to it. As you can see, it is clear that the pumpkin and the ghost were selected to be removed, but the objects are still visible despite the fact that they are now a solid background color.</p>
+<br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="data/many.JPG">
   <img style="height: 300px;" alt="" src="results/many.JPG.naive.jpeg">
@@ -127,55 +131,74 @@ The system then determines which blobs those points belong to and marks all pixe
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="results/AccuracyOfObjectRemoval.png">
 </div>
+<br>
 <p>Per the chart above, 41.7% of our results had exactly the correct amount of the objects removed. A trend we found in this percentage of images is that images with high contrast between the foreground and the background typically removed the expected amount of the image. Since there was a clear threshold with what was the foreground and background, objects and their boundaries were easily detected with the connected components technique. 33.3% of our results had less of the object removed than expected. A trend in these images is that images without high contrast between the foreground and background had less of the object removed than expected. Without high contrast, some portions of the foreground might be considered as background and remain in the image. As you can see in the chart above, 25% of the images had more of the object removed than expected. One trend in these images is that multiple objects were touching. The connected components algorithm does not distinguish between different objects when there is no background in between the objects. Because of this the user might select one object, and several objects might be removed since they are all touching and are therefore detected as one blob.This issue became worse when there were more shadows in the image. When the image had heavy shadows, it was difficult to determine a threshold value that fell in between the foreground and the background since the dark color of the shadow was often found in one of the foreground objects. Therefore, more of the background might be considered foreground, and the shadows even connected different objects into one large object in some scenarios.</p>
+<br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="results/ImageDisruption.png">
 </div>
+<br>
 <p>For trends in the disruption of our image, 83.3% of our results were disrupted to some extent. Outside of the disruptions that were caused by object removal outlined above, a trend found in these images is that they were disrupted by a large addition of seams. In order to remove a selected object, some of our images needed a large number of seams removed. When this same number of seams are added back, it is usually obvious that a large portion of the image is a repeated seam. This causes unrealistic images and sometimes displaces objects. 16.7% of our results were not disrupted. Since adding too many seams caused image disruption, removing small objects usually caused little image disruption. Most images that were not disrupted only had small objects removed.</p>
 
 <br><br>
 <!-- Qualitative Results -->
 <h3>Qualitative Results</h3>
 <p>In the images below, the input to the program is displayed on the left side and the resulting output with some object(s) removed is displayed on the right side.</p>
+<br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="data/solidObject.JPG">
   <img style="height: 300px;" alt="" src="results/solidObject.JPG.removed.jpeg">
 </div>
+<br>
 <p>The image above shows an example of a solid colored object being removed from a dark background with which it has high contrast. The portion of the image where the object used to be was replaced effectively, as the outlines of the couch cushions were filled in in a way that does not immediately appear excessively unusual and seems to fit in with the rest of the couch. However, the bottom of the couch did appear somewhat disrupted by additional seams being inserted into it. This is likely because many seams from the couch were removed to get rid of the pillow, and a majority of seams were added back at the bottom of the couch instead of where the pillow used to be.</p>
+<br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="data/highContrast.jpeg">
   <img style="height: 300px;" alt="" src="results/highContrast.jpeg.removed.jpeg">
 </div>
+<br>
 <p>The picture above shows an example of an object on top of a solid dark background with which it has high contrast. The object was removed and replaced in a way that caused relatively little disruption to the background and was thus one of the better results obtained from this experiment.</p>
+<br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="data/light.jpeg">
   <img style="height: 300px;" alt="" src="results/light.jpeg.removed.jpeg">
 </div>
+<br>
 <p>The image above shows an example of an object (mask on wall) on top of a light background with which it has high contrast. The object was removed and replaced with some noticeable disruption to the image, but not to an extent that the image appears too unusual or unusable as a Zoom background.</p>
+<br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="data/lowContrast.jpeg">
   <img style="height: 300px;" alt="" src="results/lowContrast.jpeg.removed.jpeg">
 </div>
+<br>
 <p>The image above shows an example of an object (mask on wall) on top of a light background with which it has low contrast. Clearly the results turned out very different than expected and resulted in an image with much interruption that is likely unusable as a Zoom background. This likely happened because the object and its background are too similar in color. The mask is slightly lighter than its background, and due to the way in which the threshold was set for a light background in the connected components portion, an object that is lighter than its background is not viewed as a distinct object. Instead, the program perceived the entire pillar including the mask as one object and attempted to remove the entire pillar.</p>
+<br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="data/dark.jpeg">
   <img style="height: 300px;" alt="" src="results/dark.jpeg.removed.jpeg">
 </div>
+<br>
 <p>The image above displays an example of an object (TV remote) on top of a dark background with which it has low contrast. The object was removed and replaced with some minor interruption to the image, but not severe enough to make it unusable as a Zoom background. The program was able to detect this object with low contrast from its background much better than the image that had low contrast on a light background. This is likely because the threshold for this image was set for a dark background, and the image in front of it is slightly lighter than the background. Because of this, the slightly lighter TV remote was perceived as a distinct object separate from its dark background, which means the remote was removed without removing the rest of its surroundings. Essentially, it has been found that the threshold for dark backgrounds works in detecting objects that are lighter than the background, and the threshold for light backgrounds works in detecting objects that are darker than the backgrounds.</p>
+<br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="data/multicoloredBackground.JPG">
   <img style="height: 300px;" alt="" src="results/multicoloredBackground.JPG.removed.jpeg">
 </div>
+<br>
 <p>The pictures above show a good example of how backgrounds with high contrasting colors can disrupt the image. This image was run as if the sticky note was on a light background. The blue portions of the background and the sticky note were above the threshold, these were detected as blobs. Since the sticky note is touching a portion of the blue background that spans the entire width of the image, this entire section was considered to be one blob and almost all of the image was removed along with this blob. Therefore, only one seam was used for the entire resulting image which is why this is one of the worst resulting images.</p>
+<br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="data/touching.JPG">
   <img style="height: 300px;" alt="" src="results/touching.JPG.removed.jpeg">
 </div>
+<br>
 <p>The picture above shows an example of objects that are touching in front of a light background. The program was supposed to remove the TV from the image, but the entire TV and dresser ended up getting removed. This is because the program perceived the TV and dresser as a single object instead of two distinct objects since they are touching and have relatively similar colors. Some of the other objects that were sitting on top of the dresser were not removed because they were light enough to be perceived by the program as separate objects from the TV and dresser.</p>
+<br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="data/solidBackground.JPG">
   <img style="height: 300px;" alt="" src="results/solidBackground.JPG.removed.jpeg">
 </div>
+<br>
 <p>The image above shows an example of an object on top of a solid colored, dark background with which it had high contrast. This was probably the best result from this experiment, as the object was removed and replaced with no clear disruption to the rest of the image.</p>
 
 <br><br>
