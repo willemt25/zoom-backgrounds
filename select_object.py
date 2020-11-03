@@ -80,13 +80,13 @@ if __name__ == '__main__':
     img_name = sys.argv[1]
     print(pathlib.Path().absolute())
 
-    original_img = imageio.imread(img_name)
+    original_img = imageio.imread('data/' + img_name)
 
-    img = cv2.threshold(cv2.imread(img_name, 0), 160, 255, cv2.THRESH_BINARY_INV)[1]
+    img = cv2.threshold(cv2.imread('data/' + img_name, 0), 160, 255, cv2.THRESH_BINARY_INV)[1]
 
     selection_img = preprocess_image(original_img, img)
     
-    imageio.imwrite(img_name + 'selection.jpeg', selection_img)
+    imageio.imwrite('results/' + img_name + '.selection.jpeg', selection_img)
 
     labeled_img = connected_comp(img)
 
@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
     selected_object = select_object(labeled_img)
 
-    np.save(img_name, selected_object)
+    np.save('results/' + img_name, selected_object)
     
     #this portion is just for displaying the array of 1's and 0's
 #     display_img = np.zeros_like(labeled_img)

@@ -22,7 +22,7 @@ class SeamCarve:
 
         b += abs(self.array[i, j - 1, 0] - self.array[i, j + 1, 0])
         g += abs(self.array[i, j - 1, 1] - self.array[i, j + 1, 1])
-        r += abs(self.array[is
+        r += abs(self.array[i, j - 1, 2] - self.array[i, j + 1, 2])
         energy = b + g + r
         return energy
 
@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
     img_name = sys.argv[1]
     
-    A = np.load(img_name + '.npy')
+    A = np.load('results/' + img_name + '.npy')
     B = np.empty(A.shape, dtype=bool)
     for x in range(B.shape[0]):
         for y in range(B.shape[1]):
@@ -135,7 +135,7 @@ if __name__ == '__main__':
 #    plt.imshow(mask)
 #    plt.show()
     
-    image = imread(img_name)
+    image = imread('data/' + img_name)
     
 #    plt.imshow(image)
 #    plt.show()
@@ -150,4 +150,4 @@ if __name__ == '__main__':
     plt.imshow(newImg.image())
     plt.show()
     
-    imwrite(img_name + 'removed.jpeg', newImage.image())
+    imwrite('results/' + img_name + '.removed.jpeg', newImg.image())
