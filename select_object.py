@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     original_img = imageio.imread('data/' + img_name)
 
-    img = cv2.threshold(cv2.imread('data/' + img_name, 0), 160, 255, cv2.THRESH_BINARY_INV)[1]
+    img = cv2.threshold(cv2.imread('data/' + img_name, 0), 90, 255, cv2.THRESH_BINARY)[1]
 
     selection_img = preprocess_image(original_img, img)
     
