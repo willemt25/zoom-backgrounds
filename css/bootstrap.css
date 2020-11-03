@@ -798,6 +798,7 @@ ul,
 ol {
   padding: 0;
   margin: 0 0 10px 25px;
+  font-size: 18px;
 }
 
 ul ul,
@@ -808,7 +809,7 @@ ol ul {
 }
 
 li {
-  line-height: 20px;
+  line-height: 22px;
 }
 
 ul.unstyled,
