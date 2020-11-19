@@ -66,11 +66,13 @@ def select_object(labeled_img):
         y = pixel[0]
         x = pixel[1]
         group_to_remove = labeled_img[x][y]
-        
+                
         for a in range(len(labeled_img)):
             for b in range(len(labeled_img[0])):
                 if np.array_equal(labeled_img[a][b],group_to_remove):
                     ret[a][b] = 1
+                elif not np.array_equal(np.array([0,0,0]), labeled_img[a][b]):
+                    ret[a][b] = 2
 
     return ret
 
@@ -82,13 +84,7 @@ if __name__ == '__main__':
 
     original_img = imageio.imread('data/' + img_name)
 
-    img = cv2.adaptiveThreshold(cv2.imread('data/' + img_name, 0) ,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,21,4)
-    
-#    print(img)
-    
-#    img = cv2.threshold(cv2.imread('data/' + img_name, 0), 100, 255, cv2.THRESH_BINARY_INV)[1]
-    
-#    img = cv2.threshold(cv2.imread('data/' + img_name, 0),0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
+    img = cv2.adaptiveThreshold(cv2.imread('data/' + img_name, 0) ,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,1)
 
     selection_img = preprocess_image(original_img, img)
     
@@ -101,6 +97,8 @@ if __name__ == '__main__':
     input_pixels = get_obj_coords(selection_img)
 
     selected_object = select_object(labeled_img)
+    
+    print(labeled_img)
 
     np.save('results/' + img_name, selected_object)
     
@@ -108,10 +106,12 @@ if __name__ == '__main__':
 #    display_img = np.zeros_like(labeled_img)
 #    for x in range(len(selected_object)):
 #        for y in range(len(selected_object[0])):
-#            if selected_object[x][y] == 0:
+#            if selected_object[x][y] == 1:
 #                display_img[x][y] = [255,0,0]
+#            elif selected_object[x][y] == 2:
+#                display_img[x][y] = [0,0,255]
 #            else:
-#                display_img[x][y] = [0,0,0]
+#                display_img[x][y] = [0,255,0]
 #    plt.imshow(display_img, cmap='gray')
 #    plt.axis('off')
 #    plt.title("Returned Binary Image")

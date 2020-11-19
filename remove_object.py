@@ -101,9 +101,12 @@ class SeamCarve:
             self.carve(horizontal=True, remove=self.height > new_height)
 
     def remove_mask(self, mask):
-        mp_count = np.count_nonzero(mask)
-        self.energy_array[mask] *= -(self.max_energy ** 2)
-        self.energy_array[mask] -= (self.max_energy ** 2)
+        mp_count = np.count_nonzero(mask == 1)
+        self.energy_array[mask == 1] *= -(self.max_energy ** 2)
+        self.energy_array[mask == 1] -= (self.max_energy ** 2)
+        
+        self.energy_array[mask == 2] *= (self.max_energy ** 4)
+        self.energy_array[mask == 2] += (self.max_energy ** 2)
         
         while mp_count:
             v_seam_energy, v_seam = self.compute_seam(False)
@@ -122,15 +125,7 @@ if __name__ == '__main__':
 
     img_name = sys.argv[1]
     
-    A = np.load('results/' + img_name + '.npy')
-    B = np.empty(A.shape, dtype=bool)
-    for x in range(B.shape[0]):
-        for y in range(B.shape[1]):
-            if A[x][y] == 1:
-                B[x][y] = True
-            else:
-                B[x][y] = False
-    mask = im.fromarray(B)
+    mask = np.load('results/' + img_name + '.npy')
     
 #    plt.imshow(mask)
 #    plt.show()
