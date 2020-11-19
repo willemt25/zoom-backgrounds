@@ -82,13 +82,21 @@ if __name__ == '__main__':
 
     original_img = imageio.imread('data/' + img_name)
 
-    img = cv2.threshold(cv2.imread('data/' + img_name, 0), 40, 255, cv2.THRESH_BINARY)[1]
+    img = cv2.adaptiveThreshold(cv2.imread('data/' + img_name, 0) ,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,21,4)
+    
+#    print(img)
+    
+#    img = cv2.threshold(cv2.imread('data/' + img_name, 0), 100, 255, cv2.THRESH_BINARY_INV)[1]
+    
+#    img = cv2.threshold(cv2.imread('data/' + img_name, 0),0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
 
     selection_img = preprocess_image(original_img, img)
     
     imageio.imwrite('results/' + img_name + '.selection.jpeg', selection_img)
 
     labeled_img = connected_comp(img)
+    
+    imageio.imwrite('results/' + img_name + '.labeled.jpeg', labeled_img)
 
     input_pixels = get_obj_coords(selection_img)
 
@@ -101,7 +109,7 @@ if __name__ == '__main__':
 #    for x in range(len(selected_object)):
 #        for y in range(len(selected_object[0])):
 #            if selected_object[x][y] == 0:
-#                display_img[x][y] = original_img[x][y]
+#                display_img[x][y] = [255,0,0]
 #            else:
 #                display_img[x][y] = [0,0,0]
 #    plt.imshow(display_img, cmap='gray')
