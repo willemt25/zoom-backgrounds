@@ -7,6 +7,7 @@ import sys
 import pathlib
 
 coords = np.empty((0, 2), int)
+background_coords = np.empty((0, 2), int)
 
 def get_obj_coords(img):
 
@@ -30,6 +31,30 @@ def handle_click(event):
     global coords
 
     coords = np.append(coords, np.array([[int(event.xdata), int(event.ydata)]]), axis=0)
+    plt.scatter([int(event.xdata)], [int(event.ydata)], c='white', s=5)
+    
+def get_background_coords(img):
+
+    global background_coords
+
+    fig, axes = plt.subplots(1, 1, sharey=True)
+    axes.axis("off")
+    axes.imshow(img)
+    axes.set_title("Select the background closest to the object.")
+
+    cid = fig.canvas.mpl_connect('button_press_event', handle_click_background)
+
+    cursor = Cursor(axes, useblit=True, color='red', linewidth=2)
+
+    plt.show()
+
+    return background_coords
+
+
+def handle_click_background(event):
+    global background_coords
+
+    background_coords = np.append(background_coords, np.array([[int(event.xdata), int(event.ydata)]]), axis=0)
     plt.scatter([int(event.xdata)], [int(event.ydata)], c='white', s=5)
 
 def preprocess_image(original_img, img):
@@ -61,18 +86,28 @@ def connected_comp(img):
 
 def select_object(labeled_img):
     ret = np.zeros((labeled_img.shape[0:2]))
-
-    for pixel in input_pixels:
-        y = pixel[0]
-        x = pixel[1]
-        group_to_remove = labeled_img[x][y]
+    
+    background = background_pixels[0]
+    background_pixel = labeled_img[background[1]][background[0]]
+                        
+    for a in range(len(labeled_img)):
+        for b in range(len(labeled_img[0])):
+            curr = labeled_img[a][b]
+            
+            matched = False
+            
+            for pixel in input_pixels:
+                y = pixel[0]
+                x = pixel[1]
+                group_to_remove = labeled_img[x][y]
                 
-        for a in range(len(labeled_img)):
-            for b in range(len(labeled_img[0])):
-                if np.array_equal(labeled_img[a][b],group_to_remove):
+                if np.array_equal(curr, group_to_remove):
                     ret[a][b] = 1
-                elif not np.array_equal(np.array([0,0,0]), labeled_img[a][b]):
-                    ret[a][b] = 2
+                    matched = True
+                    break
+                    
+            if not matched and not np.array_equal(curr, background_pixel):
+                ret[a][b] = 2
 
     return ret
 
@@ -84,7 +119,7 @@ if __name__ == '__main__':
 
     original_img = imageio.imread('data/' + img_name)
 
-    img = cv2.adaptiveThreshold(cv2.imread('data/' + img_name, 0) ,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,1)
+    img = cv2.adaptiveThreshold(cv2.imread('data/' + img_name, 0) ,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
 
     selection_img = preprocess_image(original_img, img)
     
@@ -95,11 +130,11 @@ if __name__ == '__main__':
     imageio.imwrite('results/' + img_name + '.labeled.jpeg', labeled_img)
 
     input_pixels = get_obj_coords(selection_img)
+    
+    background_pixels = get_background_coords(original_img)
 
     selected_object = select_object(labeled_img)
     
-    print(labeled_img)
-
     np.save('results/' + img_name, selected_object)
     
     #this portion is just for displaying the array of 1's and 0's
