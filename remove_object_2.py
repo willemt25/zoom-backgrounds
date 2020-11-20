@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import sys
 import cv2
 from scipy import ndimage, signal
-from imageio import imread, imsave
+from imageio import imread, imsave, imwrite
 from skimage.color import rgb2gray
 
 def compute_gradients(img):
@@ -92,8 +92,8 @@ def reduce_width(img, mask, energyImage):
     return reducedColorImage.astype(np.uint8), reducedEnergyImage, reducedMask
 
 def increase_width(img, energyImage):
-    increasedEnergyImageSize = (energyImage.shape[0], energyImage.shape[1] - 1)
-    increasedColorImageSize = (img.shape[0], img.shape[1] - 1, 3)
+    increasedEnergyImageSize = (energyImage.shape[0], energyImage.shape[1] + 1)
+    increasedColorImageSize = (img.shape[0], img.shape[1] + 1, 3)
 
     increasedColorImage = np.zeros(increasedColorImageSize)
     increasedEnergyImage = np.zeros(increasedEnergyImageSize)
@@ -134,6 +134,9 @@ if __name__ == '__main__':
   # 1 = background, -10000 = object, 10000 = foreground
   # read in mask
   mask = np.load('results/' + img_name + '.npy')
+
+  plt.imshow(mask)
+  plt.show()
 
   # read in image
   image = imread('data/' + img_name)
@@ -176,4 +179,4 @@ if __name__ == '__main__':
   plt.imshow(image)
   plt.show()
 
-  imageio.imwrite('results/' + img_name + '.result.jpeg', display_img)
+  imwrite('results/' + img_name + '.result.jpeg', display_img)
