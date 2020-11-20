@@ -32,7 +32,7 @@ def handle_click(event):
 
     coords = np.append(coords, np.array([[int(event.xdata), int(event.ydata)]]), axis=0)
     plt.scatter([int(event.xdata)], [int(event.ydata)], c='white', s=5)
-    
+
 def get_background_coords(img):
 
     global background_coords
@@ -86,28 +86,30 @@ def connected_comp(img):
 
 def select_object(labeled_img):
     ret = np.zeros((labeled_img.shape[0:2]))
-    
+
     background = background_pixels[0]
     background_pixel = labeled_img[background[1]][background[0]]
-                        
+
     for a in range(len(labeled_img)):
         for b in range(len(labeled_img[0])):
             curr = labeled_img[a][b]
-            
+
             matched = False
-            
+
             for pixel in input_pixels:
                 y = pixel[0]
                 x = pixel[1]
                 group_to_remove = labeled_img[x][y]
-                
+
                 if np.array_equal(curr, group_to_remove):
-                    ret[a][b] = 1
+                    ret[a][b] = -100000
                     matched = True
                     break
-                    
+
             if not matched and not np.array_equal(curr, background_pixel):
-                ret[a][b] = 2
+                ret[a][b] = 100000
+            elif not matched:
+                ret[a][b] = 1
 
     return ret
 
@@ -119,37 +121,37 @@ if __name__ == '__main__':
 
     original_img = imageio.imread('data/' + img_name)
 
-    img = cv2.adaptiveThreshold(cv2.imread('data/' + img_name, 0) ,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
+    img = cv2.adaptiveThreshold(cv2.imread('data/' + img_name, 0) ,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,19,2)
 
     selection_img = preprocess_image(original_img, img)
-    
+
     imageio.imwrite('results/' + img_name + '.selection.jpeg', selection_img)
 
     labeled_img = connected_comp(img)
-    
+
     imageio.imwrite('results/' + img_name + '.labeled.jpeg', labeled_img)
 
     input_pixels = get_obj_coords(selection_img)
-    
+
     background_pixels = get_background_coords(original_img)
 
     selected_object = select_object(labeled_img)
-    
+
     np.save('results/' + img_name, selected_object)
-    
-    #this portion is just for displaying the array of 1's and 0's
-#    display_img = np.zeros_like(labeled_img)
-#    for x in range(len(selected_object)):
-#        for y in range(len(selected_object[0])):
-#            if selected_object[x][y] == 1:
-#                display_img[x][y] = [255,0,0]
-#            elif selected_object[x][y] == 2:
-#                display_img[x][y] = [0,0,255]
-#            else:
-#                display_img[x][y] = [0,255,0]
-#    plt.imshow(display_img, cmap='gray')
-#    plt.axis('off')
-#    plt.title("Returned Binary Image")
-#    plt.show()
-#
-#    imageio.imwrite('results/' + img_name + '.naive.jpeg', display_img)
+
+    # #this portion is just for displaying the array of 1's and 0's
+    # display_img = np.zeros_like(labeled_img)
+    # for x in range(len(selected_object)):
+    #     for y in range(len(selected_object[0])):
+    #         if selected_object[x][y] == -100000:
+    #             display_img[x][y] = [255,0,0]
+    #         elif selected_object[x][y] == 100000:
+    #             display_img[x][y] = [0,0,255]
+    #         else:
+    #             display_img[x][y] = [0,255,0]
+    # plt.imshow(display_img, cmap='gray')
+    # plt.axis('off')
+    # plt.title("Returned Binary Image")
+    # plt.show()
+
+    # imageio.imwrite('results/' + img_name + '.naive.jpeg', display_img)
