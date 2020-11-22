@@ -135,8 +135,9 @@ if __name__ == '__main__':
   # read in mask
   mask = np.load('results/' + img_name + '.npy')
 
-  plt.imshow(mask)
-  plt.show()
+  imwrite('finalResults/masks/' + img_name + '.mask.jpeg', mask)
+  # plt.imshow(mask)
+  # plt.show()
 
   # read in image
   image = imread('data/' + img_name)
@@ -161,6 +162,7 @@ if __name__ == '__main__':
     # delete minimal seam from image, energy image, and mask
     image, nrg_img, mask = reduce_width(image, mask, nrg_img)
 
+  imwrite('finalResults/reducedImages/' + img_name + '.reduced.jpeg', image)
   plt.imshow(image)
   plt.show()
 
@@ -179,4 +181,5 @@ if __name__ == '__main__':
   plt.imshow(image)
   plt.show()
 
-  imwrite('results/' + img_name + '.result.jpeg', display_img)
+  imwrite('finalResults/finalImages/' + img_name + '.result.jpeg', image)
+  # imwrite('results/' + img_name + '.result.jpeg', image)

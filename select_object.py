@@ -84,7 +84,7 @@ def connected_comp(img):
 
     return labeled_img
 
-def select_object(labeled_img):
+def select_object(labeled_img, neighborhood_size):
     ret = np.zeros((labeled_img.shape[0:2]))
 
     background = background_pixels[0]
@@ -107,26 +107,27 @@ def select_object(labeled_img):
                     break
 
     modified = []
+    buffer_size = int((neighborhood_size - 1) / 2)
     for a in range(len(ret)):
         for b in range(len(ret[0])):
             if ret[a][b] == -100000 and (a,b) not in modified:
                 if a+1 < len(ret) and ret[a+1][b] == 0:
-                    for i in range(1,6):
+                    for i in range(1,buffer_size):
                         if a+i < len(ret):
                             ret[a+i][b] = -100000
                             modified.append((a+i,b))
                 if b+1 < len(ret[0]) and ret[a][b+1] == 0:
-                    for i in range(1,6):
+                    for i in range(1,buffer_size):
                         if b+i < len(ret[0]):
                             ret[a][b+i] = -100000
                             modified.append((a,b+i))
                 if a-1 > 0 and ret[a-1][b] == 0:
-                    for i in range(1,6):
+                    for i in range(1,buffer_size):
                         if a-i > 0:
                             ret[a-i][b] = -100000
                             modified.append((a-i,b))
                 if b-1 > 0 and ret[a][b-1] == 0:
-                    for i in range(1,6):
+                    for i in range(1,buffer_size):
                         if b-i > 0:
                             ret[a][b-i] = -100000
                             modified.append((a,b-i))
@@ -135,48 +136,54 @@ def select_object(labeled_img):
 
 
 if __name__ == '__main__':
-
-    # TODO: make threshold a parameter
-
     img_name = sys.argv[1]
+    neighborhood_size = int(sys.argv[2])
+    constant = int(sys.argv[3])
     print(pathlib.Path().absolute())
 
     original_img = imageio.imread('data/' + img_name)
 
-    img = cv2.adaptiveThreshold(cv2.imread('data/' + img_name, 0) ,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,1)
+    img = cv2.adaptiveThreshold(cv2.imread('data/' + img_name, 0) ,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,neighborhood_size,constant)
 
     selection_img = preprocess_image(original_img, img)
 
-    imageio.imwrite('results/' + img_name + '.selection.jpeg', selection_img)
+    # imageio.imwrite('results/' + img_name + '.selection.jpeg', selection_img)
 
     labeled_img = connected_comp(img)
 
-    imageio.imwrite('results/' + img_name + '.labeled.jpeg', labeled_img)
+    plt.imshow(labeled_img)
+    plt.show()
+
+    # imageio.imwrite('results/' + img_name + '.labeled.jpeg', labeled_img)
 
     input_pixels = get_obj_coords(selection_img)
 
     background_pixels = get_background_coords(original_img)
 
-    selected_object = select_object(labeled_img)
+    selected_object = select_object(labeled_img, neighborhood_size)
 
     plt.imshow(selected_object)
     plt.show()
 
     np.save('results/' + img_name, selected_object)
 
-    #this portion is just for displaying the array of 1's and 0's
-    display_img = np.zeros_like(labeled_img)
-    for x in range(len(selected_object)):
-        for y in range(len(selected_object[0])):
-            if selected_object[x][y] == -100000:
-                display_img[x][y] = [255,0,0]
-            elif selected_object[x][y] == 100000:
-                display_img[x][y] = [0,0,255]
-            else:
-                display_img[x][y] = [0,255,0]
-    plt.imshow(display_img, cmap='gray')
-    plt.axis('off')
-    plt.title("Returned Binary Image")
-    plt.show()
+    # #this portion is just for displaying the array of 1's and 0's
+    # display_img = np.zeros_like(labeled_img)
+    # for x in range(len(selected_object)):
+    #     for y in range(len(selected_object[0])):
+    #         if selected_object[x][y] == -100000:
+    #             display_img[x][y] = [255,0,0]
+    #         elif selected_object[x][y] == 100000:
+    #             display_img[x][y] = [0,0,255]
+    #         else:
+    #             display_img[x][y] = [0,255,0]
+    # plt.imshow(display_img, cmap='gray')
+    # plt.axis('off')
+    # plt.title("Returned Binary Image")
+    # plt.show()
 
-    imageio.imwrite('results/' + img_name + '.naive.jpeg', display_img)
+    # imageio.imwrite('results/' + img_name + '.naive.jpeg', display_img)
+
+    imageio.imwrite('finalResults/selectionImages/' + img_name + '.selection.jpeg', selection_img)
+    imageio.imwrite('finalResults/labeledImages/' + img_name + '.labeled.jpeg', labeled_img)
+
