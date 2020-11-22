@@ -42,7 +42,7 @@ color: #FF9900;
 
 <!-- Abstract -->
 <h3>Abstract</h3>
-<p>The goal of this project is to allow users to easily remove certain objects from an image so that they can use it as a Zoom background. The motivation for this project comes from the idea that it can be difficult to find areas with no distracting objects in the background to use in professional Zoom meetings. To do this, we use connected components labeling to identify distinct objects as blobs and allow the user to click on the blobs they would like to remove. Our program then removes seams from the portion of the image containing the object and adds minimal seams back so the picture remains the same size but the object is no longer visible. The results showed that images containing objects with high contrast from their background had the most successful results and resulted in the least visible interruptions in the output. It was also found that objects being removed from patterned or multi colored backgrounds often yielded the worst results with very apparent disruptions.</p>
+<p>The goal of this project is to allow users to easily remove certain objects from an image so that they can use it as a Zoom background. The motivation for this project comes from the idea that it can be difficult to find areas with no distracting objects in the background to use in professional Zoom meetings. To do this, we use adaptive Gaussian thresholding to divide the image into foreground and background. We then use connected components labeling to identify distinct objects as blobs and allow the user to click on the blobs they would like to remove. Our program then removes seams from the portion of the image containing the object and adds minimal seams back so the picture remains the same size but the object is no longer visible. The results showed that images containing objects with both high and low contrast from their background have successful results and resulted in the least visible interruptions in the output. The change in thresholding technique from the first iteration also resulted in multicolored or irregularly-shaped objects being difficult to detect; however, the algorithm now detects touching objects as distinct objects.</p>
 
 <br><br>
 <!-- Figure -->
@@ -57,34 +57,68 @@ color: #FF9900;
 <br><br>
 <!-- Introduction -->
 <h3>Introduction</h3>
-<p>The goal of our project is to remove distracting items from a scene in order to use the scene as a Zoom background in meetings. We will use a connected components segmentation algorithm to identify the distracting objects as blobs and seam carving algorithms to remove the blobs. A user can input an image and our system will allow the user to select objects to be removed. After the user chooses the blobs to remove, our system outputs a final image which can be used as a clean background. The motivation behind our idea comes from the struggle of having to find a blank wall or clean room whenever we need to join a Zoom meeting. With remote interviews and important meetings, our backgrounds become important in how we present ourselves. The system we are presenting would solve that problem by providing a quickly and easily accessible background that's not distracting (ex: textbooks or clothes behind you or preset ocean background). The domain we are working in would be regular RGB photographs.</p>
+<p>The goal of our project is to remove distracting items from a scene in order to use the scene as a Zoom background in meetings. We will use adaptive thresholding to divide the image into foreground and background, connected components segmentation algorithm to identify the distracting objects as blobs from the foreground, and seam carving algorithms to remove the blobs. A user can input an image and our system will allow the user to select objects to be removed. After the user chooses the blobs to remove, our system outputs a final image which can be used as a clean background. The motivation behind our idea comes from the struggle of having to find a blank wall or clean room whenever we need to join a Zoom meeting. With remote interviews and important meetings, our backgrounds become important in how we present ourselves. The system we are presenting would solve that problem by providing a quickly and easily accessible background that's not distracting (ex: textbooks or clothes behind you or preset ocean background). The domain we are working in would be regular RGB photographs.</p>
 
 
 <br><br>
 <!-- Approach -->
 <h3>Approach</h3>
 <p>To go about getting rid of unwanted objects in images, we first use connected component labeling to detect different blobs in the image. One of the other early segmentation techniques attempted was mean shift, but this was found to be ineffective because it resulted in objects in different locations of the image with roughly the same color being considered a single object. This made it especially hard to correctly segment multi colored objects and different objects with similar colors. Using deformable contours was also attempted, but this method made it much harder to correctly identify objects of some shapes.</p>
-<p>Therefore, connected components ended up being the chosen segmentation technique because it is able to recognize objects that are multicolored as well as any shape. This algorithm uses binary thresholding on grayscale images to separate the image into foreground and background based on color, and labels the different blobs in the foreground. We drew inspiration from https://iq.opengenus.org/connected-component-labeling/ as the basis for detecting the connected components in the image. For each image, we modified the thresholding parameters utilized in the code above. Images with light backgrounds used inverse binary thresholding, images with dark backgrounds used binary thresholding, and the threshold level was adjusted for each image depending on the level of contrast.
-From there, the user is presented with an image containing only the detected blobs with the background removed as shown below.</p>
+<p>Therefore, connected components ended up being the chosen segmentation technique because it is able to recognize objects that are multicolored as well as any shape. This algorithm uses binary thresholding on grayscale images to separate the image into foreground and background based on color, and labels the different blobs in the foreground. We drew inspiration from https://iq.opengenus.org/connected-component-labeling/ as the basis for detecting the connected components in the image. For each image, we modified the thresholding parameters utilized in the code above. In our first iteration, we utilized binary thresholding to determine the foreground and background of images. Images with light backgrounds used inverse binary thresholding, images with dark backgrounds used binary thresholding, and the threshold level was adjusted for each image depending on the level of contrast. In our second iteration, we decided to utilize an adaptive Gaussian threshold. Adaptive thresholding helps determine which parts of the image should be in the foreground and background without setting a threshold value. This helped to remove issues caused by shadows and differences in lighting. Instead, there is a window size that determines the size of the neighborhood for the Gaussian window, and a constant that removes extraneous edges that are detected. From there, the user is presented with an image containing only the detected blobs with the background removed as shown below.</p>
 <br>
 <!-- Show Blobs Figure -->
 <div style="text-align: center;">
-<img style="height: 300px;" alt="" src="results/light.jpeg.selection.jpeg">
+<figure>
+  <img style="height: 300px;" alt="" src="results/touching.JPG.selection.jpeg">
+  <figcaption>Midterm Update</figcaption>
+</figure>
+<figure>
+  <img style="height: 300px;" alt="" src="finalResults/selectionImages/touching.JPG.selection.jpeg">
+  <figcaption>Final Update</figcaption>
+</figure>
 </div>
 <br>
-<p>We chose to keep the original pixel values when displaying the blobs to the user rather than display each individual blob with a uniform color in an effort to make the objects recognizable to the user. Originally, the potential objects that a user could remove were going to be highlighted in some uniform color. However, it was found that some of the images appeared very cluttered with many different objects highlighted, and it was hard for a user to recognize objects in the picture. Therefore, the original pixel values from the image are displayed to the user, and the user can then select the blobs they would like to remove by clicking on a point within each object.
-The system then determines which blobs those points belong to and marks all pixels in those blobs for removal as shown below.</p>
+<p>We chose to keep the original pixel values when displaying the blobs to the user rather than display each individual blob with a uniform color in an effort to make the objects recognizable to the user. Originally, the potential objects that a user could remove were going to be highlighted in some uniform color. However, it was found that some of the images appeared very cluttered with many different objects highlighted, and it was hard for a user to recognize objects in the picture. Therefore, the original pixel values from the image are displayed to the user, and the user can then select the blobs they would like to remove by clicking on a point within each object. The system then determines which blobs those points belong to and marks all pixels in those blobs for removal. The segmentation outputs a numpy array that is the same size as the input image and contains 1’s where the object(s) to be removed are located and 0’s everywhere else that can be used as a mask as shown below.</p>
 <br>
 <!-- Selected Blobs Figure -->
 <div style="text-align: center;">
-<img style="height: 300px;" alt="" src="results/light.jpeg.display_selected.jpeg">
+<figure>
+  <img style="height: 300px;" alt="" src="results/touching.JPG.mask.jpeg">
+  <figcaption>Midterm Update</figcaption>
+</figure>
+<figure>
+  <img style="height: 300px;" alt="" src="finalResults/masks/touching.JPG.mask.invert.jpeg">
+  <figcaption>Final Update</figcaption>
+</figure>
 </div>
 <br>
-<p>We then use seam carving methods to remove the unwanted objects that we found during segmentation. To do this, we started working with the result from the segmentation. The numpy array from segmentation is loaded into the seam carving file. This array is changed to be an array of boolean values based on whether each pixel is a 1 or 0. This array is then transformed into an image to be the mask that will be removed using seam carving. For each image, we compute the energy image and the cumulative minimum energy map. Then, in order to replace the seams from the removed object, we took an approach similar to removing seams. We found the minimal seam and inserted it over the gap as shown below. This completely filled in the gap created by the object removal from the previous step.</p>
+<p>After discovering that our segmentation technique often resulted in the outer edges of the object failing to be removed, we implemented a buffer to slightly increase the size of the object to ensure that the entire object gets removed. To execute this, we looped over the pixels forming the border of the blob and determined which direction from this pixel marked a transition from blob to background. We then changed the background pixels surrounding the blob within distance neighborhood_size / 2 from the blob border pixel from 0s to 1s in the mask. This resulted in a “buffer” of width neighborhood size / 2 around the entire object that helped ensure the entire object gets removed.</p>
+<p>We then use seam carving methods to remove the unwanted objects that we found during segmentation. To do this, we first read in the mask that is output from the segmentation. The mask is used to weight the energy of the pixels containing the object to be removed to a very negative number so they are guaranteed to have minimal energy. For each image, we compute the energy image and the cumulative minimum energy map. For our project midterm update we computed both the vertical and horizontal minimal seams and chose the minimum energy of the two to remove. To make our final update more efficient, we first compute the total height and width of the object(s) to be removed using the mask and transpose the image if the object is wider than it is tall so we can just remove vertical seams every time. In addition, we changed our seam carving algorithm to recompute the cumulative energy map between each seam removal in our final project update to more accurately find the minimal seam to remove. The image with enough seams removed to completely remove the object is shown below.</p>
 <br>
 <!-- Filled-In Object Figure -->
 <div style="text-align: center;">
-<img style="height: 300px;" alt="" src="results/light.jpeg.removed.jpeg">
+<figure>
+  <img style="height: 200px;" alt="" src="results/touching.JPG.remove_part1.jpeg">
+  <figcaption>Midterm Update</figcaption>
+</figure>
+<figure>
+  <img style="height: 300px;" alt="" src="finalResults/reducedImages/touching.JPG.reduced.jpeg">
+  <figcaption>Final Update</figcaption>
+</figure>
+</div>
+<br>
+<p>Then, in order to replace the seams from the removed object, we took an approach similar to removing seams. We found the minimal seam and inserted it over the gap. This completely filled in the gap created by the object removal from the previous step. The improvement of recalculating the cumulative energy map after each addition of a seam also helped to smooth out the results and disrupt the images less with the insertion of seams. Finally, after adding back in enough seams to return the image to its original dimensions, we transposed the image back if it had been transposed to obtain the final result shown below.</p>
+<br>
+<!-- Filled-In Object Figure -->
+<div style="text-align: center;">
+<figure>
+  <img style="height: 300px;" alt="" src="results/touching.JPG.remove_part2.jpeg">
+  <figcaption>Midterm Update</figcaption>
+</figure>
+<figure>
+  <img style="height: 300px;" alt="" src="finalResults/finalImages/touching.JPG.result.jpeg">
+  <figcaption>Final Update</figcaption>
+</figure>
 </div>
 
 
@@ -104,7 +138,7 @@ The system then determines which blobs those points belong to and marks all pixe
 <br>
 <ol>
     <li>Take pictures of scenes with various objects to potentially remove.</li>
-    <li>Change the threshold parameters. For images with a light background, we used inverse binary thresholding. For images with a dark background, we used binary thresholding. In addition, the threshold value is adjusted for each image based on the contrast level between the background and the foreground.  We tried to have the threshold value fall in between the darkest part of the background and the lightest part of the foreground.</li>
+    <li>Change the neighborhood size and constant for adaptive thresholding. For images that have a low contrast, we typically utilized a higher neighborhood size so that more edges are detected between images. For images that have more noise, we typically utilized a high constant value so that extraneous objects are not detected. These values were adjusted for each image to account for their unique properties.</li>
     <li>Run our segmentation program and select objects from the original scene to remove.</li>
     <li>Run our blob removal and replacement program to remove the selected objects from the scene.</li>
     <li>Qualitatively evaluate the resulting image by showing it to humans and asking them to identify any inconsistencies with the chosen objects and disruptions they can perceive within the image.</li>
@@ -129,89 +163,111 @@ The system then determines which blobs those points belong to and marks all pixe
 <br>
 <h4>Results</h4>
 <div style="text-align: center;">
+<figure>
   <img style="height: 300px;" alt="" src="results/AccuracyOfObjectRemoval.png">
+  <figcaption>Midterm Update</figcaption>
+</figure>
+<figure>
+  <img style="height: 300px;" alt="" src="finalResults/AccuracyOfObjectRemoval.png">
+  <figcaption>Final Update</figcaption>
+</figure>
 </div>
 <br>
-<p>Per the chart above, 41.7% of our results had exactly the correct amount of the objects removed. A trend we found in this percentage of images is that images with high contrast between the foreground and the background typically removed the expected amount of the image. Since there was a clear threshold with what was the foreground and background, objects and their boundaries were easily detected with the connected components technique. 33.3% of our results had less of the object removed than expected. A trend in these images is that images without high contrast between the foreground and background had less of the object removed than expected. Without high contrast, some portions of the foreground might be considered as background and remain in the image. As you can see in the chart above, 25% of the images had more of the object removed than expected. One trend in these images is that multiple objects were touching. The connected components algorithm does not distinguish between different objects when there is no background in between the objects. Because of this the user might select one object, and several objects might be removed since they are all touching and are therefore detected as one blob.This issue became worse when there were more shadows in the image. When the image had heavy shadows, it was difficult to determine a threshold value that fell in between the foreground and the background since the dark color of the shadow was often found in one of the foreground objects. Therefore, more of the background might be considered foreground, and the shadows even connected different objects into one large object in some scenarios.</p>
+<p>For trends in the accuracy of object removal, we saw 58% of our images (an increase of 16.6% since phase one) displaying the objects removed exactly as expected after implementing adaptive thresholding, object edge buffers, and recalculating the cumulative energy map after each iteration of adding a seam. We still had 25% of our results (a decrease of 8% since phase one) removing less of an object than expected, which is likely due to the over-segmentation of the image causing single objects to be detected as multiple distinct objects. A trend among the images that did not remove enough is that many of them contained objects with more irregular shapes, whereas images containing objects of more simple shapes (squares/rectangles) did not have this issue. This could also be an issue because of objects with lower contrast with the background. To detect these objects, we had to increase the neighborhood size during adaptive thresholding which decreases the amount of the object that is detected. Additionally, 16.7% of our images (a decrease of 8% since phase one) had more than expected removed. This occurred when our segmentation techniques could not fully distinguish the object to be removed from the background. Because of this, portions of the background were removed along with the object.</p>
 <br>
 <div style="text-align: center;">
+<figure>
   <img style="height: 300px;" alt="" src="results/ImageDisruption.png">
+  <figcaption>Midterm Update</figcaption>
+</figure>
+<figure>
+  <img style="height: 300px;" alt="" src="finalResults/ImageDisruption.png">
+  <figcaption>Final Update</figcaption>
+</figure>
 </div>
 <br>
-<p>For trends in the disruption of our image, 83.3% of our results were disrupted to some extent. Outside of the disruptions that were caused by object removal outlined above, a trend found in these images is that they were disrupted by a large addition of seams. In order to remove a selected object, some of our images needed a large number of seams removed. When this same number of seams are added back, it is usually obvious that a large portion of the image is a repeated seam. This causes unrealistic images and sometimes displaces objects. 16.7% of our results were not disrupted. Since adding too many seams caused image disruption, removing small objects usually caused little image disruption. Most images that were not disrupted only had small objects removed.</p>
+<p>For trends in image disruption, we had 50% of our images (an increase of 33.3% since phase one) showing up not disrupted when we added adaptive thresholding, object edge buffers, and recalculating the cumulative energy map after each iteration of adding a seam. This led our results to have only 50% of images displaying some or significant disruption. In low contrast images, our new techniques allowed for little to no disruption when removing objects with little contrast between them and the background due to the added adaptive threshold. In high contrast images, images in the first iteration that had significant disruption were improved with the new approach and had somewhat disruption or no disruption.</p>
 
 <br><br>
 <!-- Qualitative Results -->
 <h3>Qualitative Results</h3>
-<p>In the images below, the input to the program is displayed on the left side and the resulting output with some object(s) removed is displayed on the right side.</p>
+<p>In the images below, the input to the program is displayed on the left side, the resulting output from the first project iteration is in the middle, and the resulting output from the second iteration with some object(s) removed is displayed on the right side.</p>
 <br>
 <div style="text-align: center;">
-  <img style="height: 300px;" alt="" src="data/solidObject.JPG">
-  <img style="height: 300px;" alt="" src="results/solidObject.JPG.removed.jpeg">
+  <img style="height: 200px;" alt="" src="data/solidObject.JPG">
+  <img style="height: 200px;" alt="" src="results/solidObject.JPG.removed.jpeg">
+  <img style="height: 200px;" alt="" src="finalResults/finalImages/solidObject.JPG.result.jpeg">
 </div>
 <br>
-<p>The image above shows an example of a solid colored object being removed from a dark background with which it has high contrast. The portion of the image where the object used to be was replaced effectively, as the outlines of the couch cushions were filled in in a way that does not immediately appear excessively unusual and seems to fit in with the rest of the couch. However, the bottom of the couch did appear somewhat disrupted by additional seams being inserted into it. This is likely because many seams from the couch were removed to get rid of the pillow, and a majority of seams were added back at the bottom of the couch instead of where the pillow used to be.</p>
+<p>The image above shows an example of a solid colored object being removed from a dark background with which it has high contrast. In both iterations of our project, the portion of the image where the object used to be was replaced effectively, as the outlines of the couch cushions were filled in in a way that does not immediately appear excessively unusual and seems to fit in with the rest of the couch. However, the bottom of the couch did appear somewhat disrupted by additional seams being inserted into it. This is likely because many seams from the couch were removed to get rid of the pillow, and a majority of seams were added back at the bottom of the couch instead of where the pillow used to be. In our second iteration, there were improvements on the disruption of couch pillows. Since the cumulative minimal energy map was calculated each time, more optimal seams were removed, and the couch cushions are no longer slanted.</p>
 <br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="data/highContrast.jpeg">
   <img style="height: 300px;" alt="" src="results/highContrast.jpeg.removed.jpeg">
+  <img style="height: 300px;" alt="" src="finalResults/finalImages/highContrast.jpeg.result.jpeg">
 </div>
 <br>
-<p>The picture above shows an example of an object on top of a solid dark background with which it has high contrast. The object was removed and replaced in a way that caused relatively little disruption to the background and was thus one of the better results obtained from this experiment.</p>
+<p>The picture above shows an example of an object on top of a dark background with which it has high contrast. In both iterations of our project, the object was removed and replaced in a way that caused relatively little disruption to the background and was thus one of the better results obtained from this experiment. The changes implemented in the second phase of our project made the artifact left behind from removing the object slightly less noticeable, and the seams inserted into the image look slightly more natural by eliminating the diagonal disruption in the upper left portion of the image.</p>
 <br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="data/light.jpeg">
   <img style="height: 300px;" alt="" src="results/light.jpeg.removed.jpeg">
+  <img style="height: 300px;" alt="" src="finalResults/finalImages/light.jpeg.result.jpeg">
 </div>
 <br>
-<p>The image above shows an example of an object (mask on wall) on top of a light background with which it has high contrast. The object was removed and replaced with some noticeable disruption to the image, but not to an extent that the image appears too unusual or unusable as a Zoom background.</p>
+<p>The image above shows an example of an object (mask on wall) on top of a light background with which it has high contrast. In the first iteration, the object was removed and replaced with some noticeable disruption to the image, but not to an extent that the image appears too unusual or unusable as a Zoom background. In the second iteration, most of the object was removed, but the straps remained behind and were elongated to leave some disruption in the resulting image. This is likely because the increased segmentation of the images that helped us detect two touching objects as distinct objects caused the straps to be detected as a separate object from the rest of the mask. This caused the straps to not be removed, and since seams from the pillar were inserted back into the image, some of these seams contained the straps and thus caused the thin line between the two straps in the output above.</p>
 <br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="data/lowContrast.jpeg">
   <img style="height: 300px;" alt="" src="results/lowContrast.jpeg.removed.jpeg">
+  <img style="height: 300px;" alt="" src="finalResults/finalImages/lowContrast.jpeg.result.jpeg">
 </div>
 <br>
-<p>The image above shows an example of an object (mask on wall) on top of a light background with which it has low contrast. Clearly the results turned out very different than expected and resulted in an image with much interruption that is likely unusable as a Zoom background. This likely happened because the object and its background are too similar in color. The mask is slightly lighter than its background, and due to the way in which the threshold was set for a light background in the connected components portion, an object that is lighter than its background is not viewed as a distinct object. Instead, the program perceived the entire pillar including the mask as one object and attempted to remove the entire pillar.</p>
+<p>The image above shows an example of an object (mask on wall) on top of a light background with which it has low contrast. In the first iteration, the results turned out very different than expected and resulted in an image with much interruption that is likely unusable as a Zoom background. This likely happened because the object and its background are too similar in color. The mask is slightly lighter than its background, and due to the way in which the threshold was set for a light background in the connected components portion, an object that is lighter than its background is not viewed as a distinct object. Instead, the program perceived the entire pillar including the mask as one object and attempted to remove the entire pillar. In the second iteration, the adaptive threshold was able to detect the light colored mask on the light background despite the fact that there is low contrast. Since the thresholding could differentiate the mask and the background, the pillar was not removed, so the image was less disrupted.</p>
 <br>
 <div style="text-align: center;">
-  <img style="height: 300px;" alt="" src="data/dark.jpeg">
-  <img style="height: 300px;" alt="" src="results/dark.jpeg.removed.jpeg">
+  <img style="height: 200px;" alt="" src="data/many.JPG">
+  <img style="height: 200px;" alt="" src="results/many.JPG.removed.jpeg">
+  <img style="height: 200px;" alt="" src="finalResults/finalImages/many.JPG.result.jpeg">
 </div>
 <br>
-<p>The image above displays an example of an object (TV remote) on top of a dark background with which it has low contrast. The object was removed and replaced with some minor interruption to the image, but not severe enough to make it unusable as a Zoom background. The program was able to detect this object with low contrast from its background much better than the image that had low contrast on a light background. This is likely because the threshold for this image was set for a dark background, and the image in front of it is slightly lighter than the background. Because of this, the slightly lighter TV remote was perceived as a distinct object separate from its dark background, which means the remote was removed without removing the rest of its surroundings. Essentially, it has been found that the threshold for dark backgrounds works in detecting objects that are lighter than the background, and the threshold for light backgrounds works in detecting objects that are darker than the backgrounds.</p>
+<p>The image above shows an example of multiple objects to remove on a dark background. The results display the output of an attempt to remove the ghost and the pumpkin from the image. The result from the first iteration from the project successfully removes the entire ghost and pumpkin without remaining any pieces of them behind. However, the resulting image with all of the seams inserted appears severely distorted and resulted in one of the objects that we didn’t want to be affected (tree) to be distorted. The result from the second iteration left behind some parts of the ghost and the pumpkin since the buffer was not wide enough to remove all the borders of the two objects. However, the final output with seams inserted did not distort the rest of the image nearly as much, as the tree and much of the rest of the background remained untouched.</p>
 <br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="data/multicoloredBackground.JPG">
   <img style="height: 300px;" alt="" src="results/multicoloredBackground.JPG.removed.jpeg">
+  <img style="height: 300px;" alt="" src="finalResults/finalImages/multicoloredBackground.JPG.result.jpeg">
 </div>
 <br>
-<p>The pictures above show a good example of how backgrounds with high contrasting colors can disrupt the image. This image was run as if the sticky note was on a light background. The blue portions of the background and the sticky note were above the threshold, these were detected as blobs. Since the sticky note is touching a portion of the blue background that spans the entire width of the image, this entire section was considered to be one blob and almost all of the image was removed along with this blob. Therefore, only one seam was used for the entire resulting image which is why this is one of the worst resulting images.</p>
+<p>The pictures above show a good example of how backgrounds with high contrasting colors can disrupt the image. In the first iteration, this image was run as if the sticky note was on a light background. The blue portions of the background and the sticky note were above the threshold, these were detected as blobs. Since the sticky note is touching a portion of the blue background that spans the entire width of the image, this entire section was considered to be one blob and almost all of the image was removed along with this blob. Therefore, only one seam was used for the entire resulting image which is why this is one of the worst resulting images. In the second iteration, the adaptive thresholding determines that each diamond from the background is a different object. When the sticky note is selected, it only blends into the diamond on the left hand side of the background. Therefore, a much smaller portion of the image is disrupted since most of the image was previously removed.</p>
 <br>
 <div style="text-align: center;">
-  <img style="height: 300px;" alt="" src="data/touching.JPG">
-  <img style="height: 300px;" alt="" src="results/touching.JPG.removed.jpeg">
+  <img style="height: 200px;" alt="" src="data/touching.JPG">
+  <img style="height: 200px;" alt="" src="results/touching.JPG.removed.jpeg">
+  <img style="height: 200px;" alt="" src="finalResults/finalImages/touching.JPG.result.jpeg">
 </div>
 <br>
-<p>The picture above shows an example of objects that are touching in front of a light background. The program was supposed to remove the TV from the image, but the entire TV and dresser ended up getting removed. This is because the program perceived the TV and dresser as a single object instead of two distinct objects since they are touching and have relatively similar colors. Some of the other objects that were sitting on top of the dresser were not removed because they were light enough to be perceived by the program as separate objects from the TV and dresser.</p>
+<p>The picture above shows an example of objects that are touching in front of a light background. The program was supposed to remove the TV from the image, but in our midterm update the entire TV and dresser ended up getting removed. This is because the program perceived the TV and dresser as a single object instead of two distinct objects since they are touching and have relatively similar colors. Some of the other objects that were sitting on top of the dresser were not removed because they were light enough to be perceived by the program as separate objects from the TV and dresser. With the use of adaptive thresholding, our new program was able to distinguish between the objects on the dresser and the dresser itself. We were able to remove only the TV in the right-hand image using our new program.</p>
 <br>
 <div style="text-align: center;">
   <img style="height: 300px;" alt="" src="data/solidBackground.JPG">
   <img style="height: 300px;" alt="" src="results/solidBackground.JPG.removed.jpeg">
+  <img style="height: 300px;" alt="" src="finalResults/finalImages/solidBackground.JPG.result.jpeg">
 </div>
 <br>
-<p>The image above shows an example of an object on top of a solid colored, dark background with which it had high contrast. This was probably the best result from this experiment, as the object was removed and replaced with no clear disruption to the rest of the image.</p>
+<p>The image above shows an example of an object on top of a solid colored, dark background with which it had high contrast. This was probably the best result from this experiment, as the object was removed and replaced with no clear disruption to the rest of the image. In the first iteration, the sticky note was removed but left a pink mark and the inserted seams somewhat disrupted the flow of the image. In the second iteration, we were able to completely remove the pink note without any residue and the new seams were added towards one end of the image, where they did not disrupt the flow.</p>
 
 <br><br>
 <!-- Conclusion -->
 <h3>Conclusion and Future Work</h3>
-<p>We started this project wanting to be able to help users remove certain objects from their Zoom backgrounds. With the increased use of video chats for school and work, it makes sense that some people might not want certain objects visible on their video screens displayed to other users. We used segmentation to pick out distinct objects on an image (that will be used as the background).We then performed seam carving and used the minimal seam to replace the object in the image identified by segmentation. The minimal seam along with a mask of the desired object was used to remove the object from the image altogether and replace it with a solid color. We found that we were able to make best use of the program by choosing images with objects that have high contrast from their background. There were, however, problems with the program perceiving objects of relatively similar color that are touching as a single object instead of distinct objects. This sometimes resulted in more objects being removed from the image than the user might have expected. There is also a problem with adding seams on patterns or multicolored backgrounds, as the flow of the image can be disrupted by the contrasting colors and textures. This sometimes resulted in seams being inserted to replace an object that did not match the background well.</p>
-<p>As a result of these efforts, we have images, shown previously, that can be used as Zoom backgrounds. However, many of the resulting images have streaks or textures where the object was removed. Therefore, we can improve our approach to make the backgrounds better and less distracting.</p>
+<p>We started this project wanting to be able to help users remove certain objects from their Zoom backgrounds. With the increased use of video chats for school and work, it makes sense that some people might not want certain objects visible on their video screens displayed to other users. We used adaptive thresholding to determine which portions of the image are foreground and background, and then a connected components algorithm to determine distinct objects from the background. The user is then able to select the object they would like to remove. We then performed seam carving and used the minimal seam to replace the object in the image identified by segmentation. The minimal seam along with a mask of the desired object was used to remove the object from the image altogether and replace it with minimal seams. We found that we were able to greatly improve the results of removing objects that were touching other objects. We also found that we were more able than before to detect objects that had low contrast when compared to their backgrounds. Our program is now able to detect objects regardless of their contrast with their background. We found that we were able to make best use of the program by choosing images with relatively regularly shaped objects. For example, the square pillow, square earbud case, square sticky note, and rectangular mask were able to be removed well with our program. However, our segmentation program struggled to detect more minor details of the shapes such as the mask straps as part of the same object. As a result, our program struggled with leaving behind portions of the objects that are shaped more irregularly. Our program also has problems detecting multicolored objects as a single object, as our segmentation method utilizes color as one of the factors to determine the segmentation of distinct objects. As a result, when trying to remove multicolored objects from images, our program would often only remove the portion of the object that was the same color as the selected portion. Users would have to select every portion of the image containing a different color to ensure the entire object is removed.</p>
+<p>As a result of these efforts, we have images, shown previously, that can be used as Zoom backgrounds. However, many of the resulting images have streaks or textures where the object was removed, or they had portions left behind of the objects that were supposed to be removed. Therefore, we can improve our approach to make the backgrounds better and less distracting.</p>
 <p>For the future, we should:</p>
 <ul>
-  <li>Use a combination of mean shift and connected components to identify blobs so objects that are touching are not always interpreted as the same blob.</li>
-  <li>Adjust the program to be applied to light or dark backgrounds using adaptive thresholding.</li>
   <li>Use an image quilting algorithm to fill in seams with texture rather than just an average of the surrounding neighbors.</li>
-  <li>Be able to smooth out gradients that appear as a result of seam carving.</li>
+  <li>Add logic to ensure that the exact same seam is not added repeatedly, even if it is the minimal seam, as this can result in noticeable disruption in the resulting image.</li>
+  <li>Implement logic to determine whether horizontal or vertical seams should be removed from each individual object to remove in the image. It could work better to remove vertical seams from one object and horizontal seams from another object within the same image. This would result in less distortion in the image from seams being moved and added back, especially when multiple objects are removed.</li>
+  <li>Find the balance between segmenting too little--resulting in two touching objects being treated as one object--and segmenting too much--resulting in single objects failing to be entirely removed. For objects that are touching, adaptive thresholding was more successful at removing the correct object. However, for single distinct objects, binary thresholding worked better to remove the entire object. We could implement functionality allowing the user to select whether the object is distinct or touching other objects, which could ensure that the best method of thresholding is used for any object they wish to remove.</li>
 </ul>
 <p>By using these techniques, we can make our approach better by allowing objects in an image to be removed seamlessly and without trace.</p>
 
@@ -220,11 +276,13 @@ The system then determines which blobs those points belong to and marks all pixe
 <h3>References</h3>
 <ul>
   <li>Avidan, S., & Shamir, A. (n.d.). Seam Carving for Content-Aware Image Resizing. Retrieved November 2, 2020, from <a href="https://perso.crans.org/frenoy/matlab2012/seamcarving.pdf">https://perso.crans.org/frenoy/matlab2012/seamcarving.pdf</a></li>
+  <li>Image Filtering. (n.d.). Retrieved November 17, 2020, from <a href="https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#gaa13106761eedf14798f37aa2d60404c9">https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#gaa13106761eedf14798f37aa2d60404c9</a></li>
   <li>Joshi, Y. (2020, April 28). Connected Component Labeling. Retrieved November 03, 2020, from <a href="https://iq.opengenus.org/linear-discriminant-analysis-lda/">https://iq.opengenus.org/linear-discriminant-analysis-lda/</a></li>
   <li>Mordvintsev, A. (n.d.). Image Thresholding¶. Retrieved November 03, 2020, from <a href="https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_thresholding/py_thresholding.html">https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_thresholding/py_thresholding.html</a></li>
   <li>Scipy.sparse.csgraph.connected_components¶. (n.d.). Retrieved November 2, 2020, from <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csgraph.connected_components.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csgraph.connected_components.html</a></li>
   <li>Seam Carving. (n.d.). Retrieved November 2, 2020, from <a href="https://scikit-image.org/docs/0.13.x/auto_examples/transform/plot_seam_carving.html">https://scikit-image.org/docs/0.13.x/auto_examples/transform/plot_seam_carving.html</a></li>
   <li>Project 2: Image Resizing by Seam Carving. (n.d.). Retrieved November 2, 2020, from <a href="http://www.cs.cmu.edu/afs/andrew/scs/cs/15-463/f07/proj2/www/wwedler/">http://www.cs.cmu.edu/afs/andrew/scs/cs/15-463/f07/proj2/www/wwedler/</a></li>
+  <li>Vivianhylee. (n.d.). Vivianhylee/seam-carving. Retrieved November 17, 2020, from <a href="https://github.com/vivianhylee/seam-carving">https://github.com/vivianhylee/seam-carving</a></li>
 </ul>
 
   <hr>
