@@ -138,7 +138,7 @@ def select_object(labeled_img, neighborhood_size):
 if __name__ == '__main__':
     img_name = sys.argv[1]
     neighborhood_size = int(sys.argv[2])
-    constant = int(sys.argv[3])
+    constant = float(sys.argv[3])
     print(pathlib.Path().absolute())
 
     original_img = imageio.imread('data/' + img_name)
